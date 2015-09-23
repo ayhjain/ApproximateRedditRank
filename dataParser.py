@@ -2,7 +2,7 @@ import csv, sys
 import numpy as np
 import time
 
-noOfInstances = 200
+noOfInstances = 10000
 noOfFeatures = 60 # 61 -url -shares +w0
 	
 x = np.zeros(shape=[noOfInstances,noOfFeatures])
