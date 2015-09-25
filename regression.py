@@ -1,11 +1,15 @@
 import csv, sys
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 from dataParser import parseCSV, x, y
 
-LAMBDA = 2
-noOfInstances = 10000
+#LAMBDA = 1
+kFold = 5
+trainingDataPortion = 0.7
+noOfTrainingEntries = 27750
 noOfFeatures = 60 # 61 -url -shares +w0
+noOfTestEntries = 11894
 wLSE = np.zeros( shape = [noOfFeatures, 1] )
 wGD = np.zeros( shape = [noOfFeatures, 1] )
 
@@ -14,24 +18,88 @@ wGD = np.zeros( shape = [noOfFeatures, 1] )
 def initialize(filename, entriesToProcess) :
 	
 	parseCSV(filename, entriesToProcess)
-	print x.shape
-	print y
+	return x[:noOfTrainingEntries,:], y[:noOfTrainingEntries,:]
+#	print x.shape
+#	print y
 	
 
 
-def learningRidgeRegression() :
+def validate(X, Y) :
+	n, m = X.shape
+#	print "\n"
+#	print n, m
+	
+	for i in range(n) :
+		y_est = np.dot(X[i,:], wLSE[:,0])
+		e = Y[i] - y_est
+		e_cum = np.absolute(e)
+	e_avg = e_cum / n
+	return e_avg
+
+
+	
+	
+def learningRidgeRegression(X , Y) :
+	
 	global wLSE
-	#Applying Ridge Regularization to Linear Regression Model
-	# w = (X'.X + Lamda I)^-1 . X'.Y
-	temp = np.dot(x.T, x)
-#	print temp
-	temp = np.add(temp, LAMBDA*np.matrix(np.identity(noOfFeatures)))
-#	print np.linalg.det(temp)
-	wLSE = np.dot(np.dot(np.linalg.inv(temp), x.T), y)
+	#global LAMBDA
+#	print X.shape
+#	print Y.shape
+	
+	# k-Fold Validation for getting best value for lambda
+	plot_e_test_sum = []
+	plot_e_train_sum = []
+	
+	for LAMBDA in range(1,200,5) : 
+		print "******************************************************************"
+		print "Evaluation for lamba ={0}".format(LAMBDA)
+		e_test_sum = e_train_sum = 0
+		
+		for i in range(kFold):
+			
+			#get sliced X and Y after removing the kth Block
+		#	print "For i = {0} and k-Fold = {1}".format(i, kFold)
+			# range(s,e) denotes the validation portion
+			s = i * (noOfTrainingEntries / kFold)
+			e = s + (noOfTrainingEntries / kFold)
+			
+			x_training = np.concatenate((X[:s,:],X[e:,:]), axis=0)
+			y_training = np.concatenate((Y[:s],Y[e:]), axis=0)
+			
+			x_test = X[s:e,:]
+			y_test = Y[s:e]
+			
+		#	print x_training.shape
+		#	print x_test.shape
+			
+			#Applying Ridge Regularization to Linear Regression Model
+			# w = (X'.X + Lamda I)^-1 . X'.Y
+			
+			temp = np.dot(x_training.T, x_training)
+		#	print temp
+			temp = np.add(temp, LAMBDA*np.matrix(np.identity(noOfFeatures)))
+		#	print np.linalg.det(temp)
+			wLSE = np.dot(np.dot(np.linalg.inv(temp), x_training.T), y_training)
+		#	printWeights(wLSE)
+			e_train = validate(x_training, y_training)
+		#	print "Training error = {0}".format(e_train)
+			e_test = validate(x_test, y_test)
+		#	print "Testing error = {0}".format(e_test)
+			
+			e_test_sum += e_test
+			e_train_sum += e_train
+		
+		np.append(plot_e_test_sum,e_test_sum/kFold)
+		np.append(plot_e_train_sum, e_train_sum/kFold)
+		print
+		print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
+		print "******************************************************************"
+		print "\n"
 	'''for i in range(noOfFeatures) :
-		print ("wLSE({0}) = {1}".format(i, wLSE[i][0]) )
+		print ("wLSE({0}) = {1}".format(i, wLSE[i,0]) )
 	print "\n\n"
 	'''
+	plt.plot(plot_e_train_sum, range(1,200,5), 'ro', plot_e_test_sum, range(1,200,5), 'bs')
 
 
 def learningGradientDescent() :
@@ -45,7 +113,7 @@ def learningGradientDescent() :
 def printWeights(weight) :
 	
 	for i in range(noOfFeatures) :
-		print ("weight({0}) = {1}".format(i, weight[i][0]) )
+		print ("weight({0}) = {1}".format(i, weight[i,0]) )
 	print "\n\n"
 
 
@@ -57,18 +125,26 @@ if __name__ == "__main__" :
 	
 	global wLSE
 	global wGD
+	global noOfTestEntries
+	global noOfTrainingEntries
 
 	filename = sys.argv[1]
-	entriesToProcess = sys.argv[2]
-#	print entriesToProcess
+	entriesToProcess = int(sys.argv[2])
+	kFold = int(sys.argv[3])
 	
-	initialize(filename, entriesToProcess)
+	noOfTrainingEntries = int(trainingDataPortion *  entriesToProcess)
+	noOfTestEntries = entriesToProcess - noOfTrainingEntries
 	
-	learningRidgeRegression()
-	printWeights(wLSE)
+	print filename, noOfTestEntries, noOfTrainingEntries, kFold
+	#	print entriesToProcess
+	
+	X_Training , Y_Training = initialize(filename, entriesToProcess)
+	
+	learningRidgeRegression(X_Training , Y_Training)
+#	printWeights(wLSE)
 		
-	learningGradientDescent()
-	printWeights(wGD)
+#	learningGradientDescent()
+#	printWeights(wGD)
 	
 	
 	######################

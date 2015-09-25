@@ -2,11 +2,11 @@ import csv, sys
 import numpy as np
 import time
 
-noOfInstances = 10000
+totalDataRows = 40000
 noOfFeatures = 60 # 61 -url -shares +w0
 	
-x = np.zeros(shape=[noOfInstances,noOfFeatures])
-y = np.zeros(shape=[noOfInstances, 1])
+x = np.zeros(shape=[totalDataRows,noOfFeatures])
+y = np.zeros(shape=[totalDataRows, 1])
 
 
 
@@ -48,5 +48,5 @@ if __name__ == "__main__" :
 	parseCSV(filename, entriesToProcess)
 	
 #	print x[0]
-#	print y
+	print y
 	print "Bye"
