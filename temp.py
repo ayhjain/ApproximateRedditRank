@@ -3,6 +3,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from dataParser import parseCSV, x, y
+from sklearn import linear_model
 
 #LAMBDA = 1
 kFold = 5
@@ -21,8 +22,6 @@ def initialize(filename, entriesToProcess) :
 	return x[:noOfTrainingEntries,:], y[:noOfTrainingEntries,:]
 #	print x.shape
 #	print y
-	
-
 
 def validate(X, Y, weight) :
 	n, m = X.shape
@@ -50,7 +49,7 @@ def learningRidgeRegression(X , Y) :
 	plot_e_test_sum = []
 	plot_e_train_sum = []
 	
-	for LAMBDA in range(1,6,5) : 
+	for LAMBDA in range(1,200,5) : 
 		print "******************************************************************"
 		print "Evaluation for lamba ={0}".format(LAMBDA)
 		e_test_sum = e_train_sum = 0
@@ -59,7 +58,6 @@ def learningRidgeRegression(X , Y) :
 			
 			#get sliced X and Y after removing the kth Block
 		#	print "For i = {0} and k-Fold = {1}".format(i, kFold)
-			
 			# range(s,e) denotes the validation portion
 			s = i * (noOfTrainingEntries / kFold)
 			e = s + (noOfTrainingEntries / kFold)
@@ -74,89 +72,28 @@ def learningRidgeRegression(X , Y) :
 		#	print x_test.shape
 			
 			#Applying Ridge Regularization to Linear Regression Model
-			# w = (X'.X + Lamda.I)^-1 . X'.Y
+			# w = (X'.X + Lamda I)^-1 . X'.Y
+			regr = linear_model.LinearRegression()
+			regr.fit(x_training, y_training)
+			y_est = regr.predict(x_test)
+			n,m =y_est.shape
+			e_avg = 0
+			for i in range(n) :
+				#print y_est[i], y_test[i]
+				e = math.pow((y_test[i] - y_est[i]), 2)/n
+				e_avg += e
 			
-			temp = np.dot(x_training.T, x_training)
-		#	print temp
-			temp = np.add(temp, LAMBDA*np.matrix(np.identity(noOfFeatures)))
-		#	print np.linalg.det(temp)
-			wLSE = np.dot(np.dot(np.linalg.inv(temp), x_training.T), y_training)
-		#	printWeights(wLSE)
-			e_train = validate(x_training, y_training, wLSE)
-		#	print "Training error = {0}".format(e_train)
-			e_test = validate(x_test, y_test, wLSE)
-		#	print "Testing error = {0}".format(e_test)
-			
-			e_test_sum += e_test
-			e_train_sum += e_train
-		
-		np.append(plot_e_test_sum,e_test_sum/kFold)
-		np.append(plot_e_train_sum, e_train_sum/kFold)
 		print
-		print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
+		print "Avg. Testing Error = {0}".format(e_avg)
 		print "******************************************************************"
 		print "\n"
 	'''for i in range(noOfFeatures) :
 		print ("wLSE({0}) = {1}".format(i, wLSE[i,0]) )
 	print "\n\n"
+	
+	plt.plot(plot_e_train_sum, range(1,200,5), 'ro', plot_e_test_sum, range(1,200,5), 'bs)
 	'''
-	plt.plot(plot_e_train_sum, range(1,200,5), 'ro'''', plot_e_test_sum, range(1,200,5), 'bs''')
 
-
-def learningGradientDescent(X, Y, noOfIterations) :
-	
-	global wGD
-#	print X.shape
-#	print Y.shape
-	
-	plot_e_test_sum = []
-	plot_e_train_sum = []
-	
-	e_test_sum = e_train_sum = 0
-	
-	for i in range(kFold):
-		
-		#get sliced X and Y after removing the kth Block
-		# range(s,e) denotes the validation portion
-		s = i * (noOfTrainingEntries / kFold)
-		e = s + (noOfTrainingEntries / kFold)
-		
-		x_training = np.concatenate((X[:s,:],X[e:,:]), axis=0)
-		y_training = np.concatenate((Y[:s],Y[e:]), axis=0)
-		n, m = x_training.shape
-		
-		x_test = X[s:e,:]
-		y_test = Y[s:e]
-	#	print x_training.shape
-	#	print x_test.shape
-		
-		for j in range(noOfIterations):
-			
-			alfa = 1/(j+1)
-			hypothesis = np.dot(x_training, wGD)
-			loss = hypothesis - y_training
-			gradient = np.dot(x_training.T, loss)/n
-			wGD = wGD - alfa*gradient
-			temp = np.dot(x_training.T, x_training)
-			
-		e_train = validate(x_training, y_training, wGD)
-	#	print "Training error = {0}".format(e_train)
-		e_test = validate(x_test, y_test, wGD)
-	#	print "Testing error = {0}".format(e_test)
-		
-		e_test_sum += e_test
-		e_train_sum += e_train
-
-		print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
-		print "******************************************************************"
-		print "\n"
-	'''for i in range(noOfFeatures) :
-		print ("wLSE({0}) = {1}".format(i, wLSE[i,0]) )
-	print "\n\n"
-	'''
-	#plt.plot(plot_e_train_sum, range(1,200,5), 'ro', plot_e_test_sum, range(1,200,5), 'bs')
-	
-	
 	
 def printWeights(weight) :
 	
@@ -164,8 +101,6 @@ def printWeights(weight) :
 		print ("weight({0}) = {1}".format(i, weight[i,0]) )
 	print "\n\n"
 
-
-		
 		
 		
 		
@@ -187,18 +122,7 @@ if __name__ == "__main__" :
 	#	print entriesToProcess
 	
 	X_Training , Y_Training = initialize(filename, entriesToProcess)
-	
+
 	learningRidgeRegression(X_Training , Y_Training)
-#	printWeights(wLSE)
-		
-#	learningGradientDescent(X_Training, Y_Training, 1000)
-#	printWeights(wGD)
-	
-	
-	######################
-	#
-	#	Code to test for testing
-	#
-	######################
-	
+	print np.average(y)
 	print "Bye"
