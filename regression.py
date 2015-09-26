@@ -30,8 +30,8 @@ def validate(X, Y, weight) :
 #	print n, m
 	e_avg = 0
 	for i in range(n) :
-		y_est = np.dot(X[i,:], weight[:,0])
-		e = math.pow((Y[i] - y_est), 2)/n
+		y_est = np.dot( X[i,:], weight[:,0] )
+		e = math.pow( (Y[i] - y_est), 2 ) / n
 #		print Y[i], y_est
 		e_avg += e
 	return e_avg
@@ -127,35 +127,24 @@ def learningGradientDescent(X, Y, noOfIterations) :
 		
 		x_test = X[s:e,:]
 		y_test = Y[s:e]
-	#	print x_training.shape
-	#	print x_test.shape
 		
 		for j in range(noOfIterations):
-			
-			alfa = 1/(j+1)
+			alfa = 1.0/((j+1)**2)
 			hypothesis = np.dot(x_training, wGD)
 			loss = hypothesis - y_training
-			gradient = np.dot(x_training.T, loss)/n
-			wGD = wGD - alfa*gradient
-			temp = np.dot(x_training.T, x_training)
-			
-		e_train = validate(x_training, y_training, wGD)
-	#	print "Training error = {0}".format(e_train)
-		e_test = validate(x_test, y_test, wGD)
-	#	print "Testing error = {0}".format(e_test)
+			cost = np.sum(loss ** 2) / (2*n)
+			print("Iteration %d | Cost: %f" % (j, cost))
+			gradient = np.dot(x_training.T, loss) / n
+			wGD -= alfa*gradient
 		
-		e_test_sum += e_test
-		e_train_sum += e_train
+		e_train_sum += validate(x_training, y_training, wGD)
+		e_test_sum += validate(x_test, y_test, wGD)
 
-		print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
-		print "******************************************************************"
-		print "\n"
-	'''for i in range(noOfFeatures) :
-		print ("wLSE({0}) = {1}".format(i, wLSE[i,0]) )
-	print "\n\n"
-	'''
-	#plt.plot(plot_e_train_sum, range(1,200,5), 'ro', plot_e_test_sum, range(1,200,5), 'bs')
-	
+	print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
+	print "******************************************************************"
+	print "\n"
+
+
 	
 	
 def printWeights(weight) :
@@ -165,10 +154,10 @@ def printWeights(weight) :
 	print "\n\n"
 
 
-		
-		
-		
-		
+
+
+
+
 if __name__ == "__main__" : 
 	
 	global wLSE
@@ -188,10 +177,10 @@ if __name__ == "__main__" :
 	
 	X_Training , Y_Training = initialize(filename, entriesToProcess)
 	
-	learningRidgeRegression(X_Training , Y_Training)
+#	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-#	learningGradientDescent(X_Training, Y_Training, 1000)
+	learningGradientDescent(X_Training, Y_Training, 10000)
 #	printWeights(wGD)
 	
 	
