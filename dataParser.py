@@ -5,10 +5,6 @@ import time
 totalDataRows = 40000
 noOfFeatures = 60 # 61 -url -shares +w0
 	
-#x = np.ones(shape=[totalDataRows,noOfFeatures])
-#y = np.zeros(shape=[totalDataRows, 1])
-
-
 
 def normalize(x):
 	x_max = np.amax(x, axis =  0)
@@ -16,7 +12,7 @@ def normalize(x):
 	x = (x[:,]-x_min)/x_max	
 	return x
 
-def parseCSV(filename, entriesToProcess):
+def parseCSV(filename, entriesToProcess, normalize = False):
 	
 	x = np.ones(shape=[totalDataRows,noOfFeatures])
 	y = np.zeros(shape=[totalDataRows, 1])
@@ -27,7 +23,8 @@ def parseCSV(filename, entriesToProcess):
 		i = 0
 		for row in reader :
 			x[i][0] = 1.0
-			j = 1
+			j = 1			# for adding w0 value to the matrix
+			
 			for key, value in row.items() :
 #				print j, key, value
 				if (key != 'url') :
@@ -47,8 +44,10 @@ def parseCSV(filename, entriesToProcess):
 			if (i>=int(entriesToProcess)): break
 	
 	print ("Done parsing!")
-	x = normalize(x)
-	print x
+	
+	if (normalize):
+		x = normalize(x)
+		print x
 	return x,y
 
 
