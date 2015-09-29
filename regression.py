@@ -108,6 +108,7 @@ def learningRidgeRegression(X , Y) :
 def learningGradientDescent(X, Y, noOfIterations) :
 	
 	global wGD
+	
 #	print X.shape
 #	print Y.shape
 	
@@ -130,12 +131,13 @@ def learningGradientDescent(X, Y, noOfIterations) :
 		x_test = X[s:e,:]
 		y_test = Y[s:e]
 		
+		wGD = np.random.uniform(0,1,[noOfFeatures,1])
 		
 		
-		for j in range(10000):
-			alfa = 0.0000000000000001/((j+1)**2)
+		for j in range(noOfIterations):
+			alfa = 0.001#/((j+1)**2)
 			hypothesis = np.dot(x_training, wGD)
-			loss = y_training - hypothesis
+			loss = hypothesis - y_training
 			cost = np.sum(loss ** 2) / (2*n)
 			print("Iteration %d | Cost: %f" % (j, cost))
 			gradient = np.dot(x_training.T, loss) / n
@@ -181,10 +183,10 @@ if __name__ == "__main__" :
 	
 	X_Training , Y_Training = initialize(filename, entriesToProcess)
 	
-#	learningRidgeRegression(X_Training , Y_Training)
+	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-	learningGradientDescent(X_Training, Y_Training, 100)
+#	learningGradientDescent(X_Training, Y_Training, 100000)
 #	printWeights(wGD)
 	
 	
