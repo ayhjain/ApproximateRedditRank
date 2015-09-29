@@ -2,7 +2,7 @@ import csv, sys, math
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-from dataParser import parseCSV, x, y
+from dataParser import parseCSV
 
 #LAMBDA = 1
 kFold = 5
@@ -11,13 +11,12 @@ noOfTrainingEntries = 27750
 noOfFeatures = 60 # 61 -url -shares +w0
 noOfTestEntries = 11894
 wLSE = np.zeros( shape = [noOfFeatures, 1] )
-wGD = np.ones( shape = [noOfFeatures, 1] )
+wGD = np.random.uniform(0,1,[noOfFeatures,1])
 
 
 
 def initialize(filename, entriesToProcess) :
-	
-	parseCSV(filename, entriesToProcess)
+	x ,y = parseCSV(filename, entriesToProcess)
 	return x[:noOfTrainingEntries,:], y[:noOfTrainingEntries,:]
 #	print x.shape
 #	print y
@@ -103,14 +102,17 @@ def learningRidgeRegression(X , Y) :
 	plt.plot(plot_e_train_sum, range(1,200,5), 'ro'''', plot_e_test_sum, range(1,200,5), 'bs''')
 
 
+
+	
+	
 def learningGradientDescent(X, Y, noOfIterations) :
 	
 	global wGD
 #	print X.shape
 #	print Y.shape
 	
-	plot_e_test_sum = []
-	plot_e_train_sum = []
+#	plot_e_test_sum = []
+#	plot_e_train_sum = []
 	
 	e_test_sum = e_train_sum = 0
 	
@@ -128,10 +130,12 @@ def learningGradientDescent(X, Y, noOfIterations) :
 		x_test = X[s:e,:]
 		y_test = Y[s:e]
 		
-		for j in range(noOfIterations):
-			alfa = 1.0/((j+1)**2)
+		
+		
+		for j in range(10000):
+			alfa = 0.0000000000000001/((j+1)**2)
 			hypothesis = np.dot(x_training, wGD)
-			loss = hypothesis - y_training
+			loss = y_training - hypothesis
 			cost = np.sum(loss ** 2) / (2*n)
 			print("Iteration %d | Cost: %f" % (j, cost))
 			gradient = np.dot(x_training.T, loss) / n
@@ -180,7 +184,7 @@ if __name__ == "__main__" :
 #	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-	learningGradientDescent(X_Training, Y_Training, 10000)
+	learningGradientDescent(X_Training, Y_Training, 100)
 #	printWeights(wGD)
 	
 	

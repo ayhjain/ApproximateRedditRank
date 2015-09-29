@@ -5,12 +5,21 @@ import time
 totalDataRows = 40000
 noOfFeatures = 60 # 61 -url -shares +w0
 	
-x = np.zeros(shape=[totalDataRows,noOfFeatures])
-y = np.zeros(shape=[totalDataRows, 1])
+#x = np.ones(shape=[totalDataRows,noOfFeatures])
+#y = np.zeros(shape=[totalDataRows, 1])
 
 
+
+def normalize(x):
+	x_max = np.amax(x, axis =  0)
+	x_min = np.amin(x, axis = 0)
+	x = (x[:,]-x_min)/x_max	
+	return x
 
 def parseCSV(filename, entriesToProcess):
+	
+	x = np.ones(shape=[totalDataRows,noOfFeatures])
+	y = np.zeros(shape=[totalDataRows, 1])
 	
 	with open(filename) as inputs:
 		reader = csv.DictReader(inputs)
@@ -36,7 +45,11 @@ def parseCSV(filename, entriesToProcess):
 						# control shouldn't be in this portion of Code
 			i += 1
 			if (i>=int(entriesToProcess)): break
+	
 	print ("Done parsing!")
+	x = normalize(x)
+	print x
+	return x,y
 
 
 if __name__ == "__main__" : 
