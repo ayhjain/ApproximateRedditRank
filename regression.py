@@ -8,7 +8,7 @@ from dataParser import parseCSV
 kFold = 5
 trainingDataPortion = 0.7
 noOfTrainingEntries = 27750
-noOfFeatures = 60 # 61 -url -shares +w0
+noOfFeatures = 59 # 61 -url -shares -timedelta +w0
 noOfTestEntries = 11894
 wLSE = np.zeros( shape = [noOfFeatures, 1] )
 wGD = np.random.uniform(0,1,[noOfFeatures,1])
@@ -16,7 +16,7 @@ wGD = np.random.uniform(0,1,[noOfFeatures,1])
 
 
 def initialize(filename, entriesToProcess) :
-	x ,y = parseCSV(filename, entriesToProcess)
+	x ,y = parseCSV(filename, entriesToProcess, noOfFeatures, False)
 	return x[:noOfTrainingEntries,:], y[:noOfTrainingEntries,:]
 #	print x.shape
 #	print y
@@ -99,7 +99,10 @@ def learningRidgeRegression(X , Y) :
 		print ("wLSE({0}) = {1}".format(i, wLSE[i,0]) )
 	print "\n\n"
 	'''
-	plt.plot(plot_e_train_sum, range(1,200,5), 'ro'''', plot_e_test_sum, range(1,200,5), 'bs''')
+	plt.plot(plot_e_train_sum, range(1,200,5), 'ro')
+	'''
+	, plot_e_test_sum, range(1,200,5), 'bs')
+	'''
 
 
 
@@ -109,46 +112,58 @@ def learningGradientDescent(X, Y, noOfIterations) :
 	
 	global wGD
 	
-#	print X.shape
-#	print Y.shape
 	
-#	plot_e_test_sum = []
-#	plot_e_train_sum = []
+	plot_e_test_sum = []
+	plot_e_train_sum = []
 	
 	e_test_sum = e_train_sum = 0
+	for iter in range(1000, noOfIterations, 500):
+		for i in range(kFold):
+			
+			#get sliced X and Y after removing the kth Block
+			# range(s,e) denotes the validation portion
+			s = i * (noOfTrainingEntries / kFold)
+			e = s + (noOfTrainingEntries / kFold)
+			
+			x_training = np.concatenate((X[:s,:],X[e:,:]), axis=0)
+			y_training = np.concatenate((Y[:s],Y[e:]), axis=0)
+			n, m = x_training.shape
+			
+			x_test = X[s:e,:]
+			y_test = Y[s:e]
+			
+			wGD = np.random.uniform(0,1,[noOfFeatures,1])
+			
+			
+			for j in range(iter):
+				alfa = 0.000000000001#/((j+1)**2)
+				hypothesis = np.dot(x_training, wGD)
+				loss = hypothesis - y_training
+				cost = np.sum(loss ** 2) / (2*n)
+				print("Iteration %d | Cost: %f" % (j, cost))
+				gradient = np.dot(x_training.T, loss) / n
+				wGD -= alfa*gradient
+			
+			e_train_sum += (validate(x_training, y_training, wGD)/kFold)
+			e_test_sum += (validate(x_test, y_test, wGD)/kFold)
+			
+		plot_e_train_sum.append(e_train_sum)
+		plot_e_test_sum.append(e_test_sum)
 	
-	for i in range(kFold):
-		
-		#get sliced X and Y after removing the kth Block
-		# range(s,e) denotes the validation portion
-		s = i * (noOfTrainingEntries / kFold)
-		e = s + (noOfTrainingEntries / kFold)
-		
-		x_training = np.concatenate((X[:s,:],X[e:,:]), axis=0)
-		y_training = np.concatenate((Y[:s],Y[e:]), axis=0)
-		n, m = x_training.shape
-		
-		x_test = X[s:e,:]
-		y_test = Y[s:e]
-		
-		wGD = np.random.uniform(0,1,[noOfFeatures,1])
-		
-		
-		for j in range(noOfIterations):
-			alfa = 0.001#/((j+1)**2)
-			hypothesis = np.dot(x_training, wGD)
-			loss = hypothesis - y_training
-			cost = np.sum(loss ** 2) / (2*n)
-			print("Iteration %d | Cost: %f" % (j, cost))
-			gradient = np.dot(x_training.T, loss) / n
-			wGD -= alfa*gradient
-		
-		e_train_sum += validate(x_training, y_training, wGD)
-		e_test_sum += validate(x_test, y_test, wGD)
-
+	plot_e_test_sum = np.array(plot_e_test_sum)
+	plot_e_train_sum=mnp.array(plot_e_train_sum)
+	
+	'''
 	print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
 	print "******************************************************************"
 	print "\n"
+	'''
+	
+	plt.plot(range(1000, noOfIterations, 100), plot_e_train_sum, 'r0', range(1000, noOfIterations, 100), plot_e_test_sum, 'bs')
+	plt.ylabel("Error")
+	plt.xlabel("No. of Iterations")
+	plt.show()
+	
 
 
 	
@@ -183,10 +198,10 @@ if __name__ == "__main__" :
 	
 	X_Training , Y_Training = initialize(filename, entriesToProcess)
 	
-	learningRidgeRegression(X_Training , Y_Training)
+#	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-#	learningGradientDescent(X_Training, Y_Training, 100000)
+	learningGradientDescent(X_Training, Y_Training, 10000)
 #	printWeights(wGD)
 	
 	
