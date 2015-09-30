@@ -2,20 +2,17 @@ import csv, sys
 import numpy as np
 import time
 
-totalDataRows = 40000
-noOfFeatures = 60 # 61 -url -shares +w0
 	
-
 def normalize(x):
 	x_max = np.amax(x, axis =  0)
 	x_min = np.amin(x, axis = 0)
 	x = (x[:,]-x_min)/x_max	
 	return x
 
-def parseCSV(filename, entriesToProcess, normalize = False):
+def parseCSV(filename, entriesToProcess, noOfFeatures = 60, normalize_flag = False):
 	
-	x = np.ones(shape=[totalDataRows,noOfFeatures])
-	y = np.zeros(shape=[totalDataRows, 1])
+	x = np.ones(shape=[entriesToProcess,noOfFeatures])
+	y = np.zeros(shape=[entriesToProcess, 1])
 	
 	with open(filename) as inputs:
 		reader = csv.DictReader(inputs)
@@ -45,9 +42,9 @@ def parseCSV(filename, entriesToProcess, normalize = False):
 	
 	print ("Done parsing!")
 	
-	if (normalize):
+	if (normalize_flag):
 		x = normalize(x)
-		print x
+
 	return x,y
 
 
@@ -55,9 +52,9 @@ if __name__ == "__main__" :
 	
 	filename = sys.argv[1]
 	entriesToProcess = sys.argv[2]
-#	print entriesToProcess
+	noOfFeatures = sys.argv[3]
 	
-	parseCSV(filename, entriesToProcess)
+	parseCSV(filename, entriesToProcess, noOfFeatures)
 	
 #	print x[0]
 	print y
