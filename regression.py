@@ -44,7 +44,7 @@ def learningRidgeRegression(X , Y) :
 	plot_e_test_sum = []
 	plot_e_train_sum = []
 	
-	for LAMBDA in range(1,6,5) : 
+	for LAMBDA in range(1,200,5) : 
 		print "******************************************************************"
 		print "Evaluation for lamba ={0}".format(LAMBDA)
 		e_test_sum = e_train_sum = 0
@@ -95,6 +95,7 @@ def learningRidgeRegression(X , Y) :
 	print "\n\n"
 	'''
 	plt.plot(plot_e_train_sum, range(1,200,5), 'ro')
+	plt.show()
 	'''
 	, plot_e_test_sum, range(1,200,5), 'bs')
 	'''
@@ -112,7 +113,7 @@ def learningGradientDescent(X, Y, noOfIterations) :
 	plot_e_train_sum = []
 	
 	e_test_sum = e_train_sum = 0
-	for iter in range(1000, noOfIterations, 500):
+	for iter in range(1000, noOfIterations, 1000):
 		
 		e_test_sum = e_train_sum = 0
 		
@@ -138,7 +139,7 @@ def learningGradientDescent(X, Y, noOfIterations) :
 				hypothesis = np.dot(x_training, wGD)
 				loss = hypothesis - y_training
 				cost = np.sum(loss ** 2) / (2*n)
-			#	print("Iteration %d | Cost: %f" % (j, cost))
+				print("Iteration %d | Cost: %f" % (j, cost))
 				gradient = np.dot(x_training.T, loss) / n
 				wGD -= alfa*gradient
 			
@@ -158,8 +159,8 @@ def learningGradientDescent(X, Y, noOfIterations) :
 	
 	
 	
-	plt.plot(range(1000, noOfIterations, 500), plot_e_train_sum, 'ro', label = "Training Error")
-	plt.plot(range(1000, noOfIterations, 500), plot_e_test_sum, 'bs', label = "Testing Error")
+	plt.plot(range(1000, noOfIterations, 1000), plot_e_train_sum, 'ro', label = "Training Error")
+	plt.plot(range(1000, noOfIterations, 1000), plot_e_test_sum, 'bs', label = "Testing Error")
 	plt.ylabel("Error")
 	plt.xlabel("No. of Iterations")
 	plt.legend()
