@@ -203,10 +203,10 @@ if __name__ == "__main__" :
 	
 	X_Training , Y_Training = initialize(filename, entriesToProcess)
 	
-#	learningRidgeRegression(X_Training , Y_Training)
+	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-	learningGradientDescent(X_Training, Y_Training, 10001)
+#	learningGradientDescent(X_Training, Y_Training, 10001)
 #	printWeights(wGD)
 	
 	
