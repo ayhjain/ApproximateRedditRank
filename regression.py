@@ -24,15 +24,10 @@ def initialize(filename, entriesToProcess) :
 
 
 def validate(X, Y, weight) :
-	n, m = X.shape
-#	print "\n"
-#	print n, m
+	n,m = X.shape
 	e_avg = 0
-	for i in range(n) :
-		y_est = np.dot( X[i,:], weight[:,0] )
-		e = math.pow( (Y[i] - y_est), 2 ) / n
-#		print Y[i], y_est
-		e_avg += e
+	y_est = np.dot(X,weight)
+	e_avg = np.sum((Y-y_est) ** 2) / (2*n)
 	return e_avg
 
 
@@ -118,6 +113,9 @@ def learningGradientDescent(X, Y, noOfIterations) :
 	
 	e_test_sum = e_train_sum = 0
 	for iter in range(1000, noOfIterations, 500):
+		
+		e_test_sum = e_train_sum = 0
+		
 		for i in range(kFold):
 			
 			#get sliced X and Y after removing the kth Block
@@ -134,35 +132,39 @@ def learningGradientDescent(X, Y, noOfIterations) :
 			
 			wGD = np.random.uniform(0,1,[noOfFeatures,1])
 			
-			
+			cost = 0.0
 			for j in range(iter):
 				alfa = 0.000000000001#/((j+1)**2)
 				hypothesis = np.dot(x_training, wGD)
 				loss = hypothesis - y_training
 				cost = np.sum(loss ** 2) / (2*n)
-				print("Iteration %d | Cost: %f" % (j, cost))
+			#	print("Iteration %d | Cost: %f" % (j, cost))
 				gradient = np.dot(x_training.T, loss) / n
 				wGD -= alfa*gradient
 			
 			e_train_sum += (validate(x_training, y_training, wGD)/kFold)
 			e_test_sum += (validate(x_test, y_test, wGD)/kFold)
 			
+		print "Iteration = {0}\tAvg. Training Error = {1}\tAvg. Testing Error = {2}".format(iter, e_train_sum, e_test_sum)
+		print "******************************************************************\n"
+		
 		plot_e_train_sum.append(e_train_sum)
 		plot_e_test_sum.append(e_test_sum)
 	
 	plot_e_test_sum = np.array(plot_e_test_sum)
-	plot_e_train_sum=mnp.array(plot_e_train_sum)
+	plot_e_train_sum = np.array(plot_e_train_sum)
 	
-	'''
-	print "Avg. Training Error = {0}\tAvg. Testing Error = {1}".format(e_train_sum/kFold , e_test_sum/kFold)
-	print "******************************************************************"
-	print "\n"
-	'''
 	
-	plt.plot(range(1000, noOfIterations, 100), plot_e_train_sum, 'r0', range(1000, noOfIterations, 100), plot_e_test_sum, 'bs')
+	
+	
+	
+	plt.plot(range(1000, noOfIterations, 500), plot_e_train_sum, 'ro', label = "Training Error")
+	plt.plot(range(1000, noOfIterations, 500), plot_e_test_sum, 'bs', label = "Testing Error")
 	plt.ylabel("Error")
 	plt.xlabel("No. of Iterations")
+	plt.legend()
 	plt.show()
+	
 	
 
 
@@ -185,10 +187,12 @@ if __name__ == "__main__" :
 	global wGD
 	global noOfTestEntries
 	global noOfTrainingEntries
-
+	global noOfFeatures
+	
 	filename = sys.argv[1]
 	entriesToProcess = int(sys.argv[2])
-	kFold = int(sys.argv[3])
+	noOfFeatures = int(sys.argv[3])
+	kFold = int(sys.argv[4])
 	
 	noOfTrainingEntries = int(trainingDataPortion *  entriesToProcess)
 	noOfTestEntries = entriesToProcess - noOfTrainingEntries
@@ -201,7 +205,7 @@ if __name__ == "__main__" :
 #	learningRidgeRegression(X_Training , Y_Training)
 #	printWeights(wLSE)
 		
-	learningGradientDescent(X_Training, Y_Training, 10000)
+	learningGradientDescent(X_Training, Y_Training, 10001)
 #	printWeights(wGD)
 	
 	

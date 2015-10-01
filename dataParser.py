@@ -29,7 +29,7 @@ def parseCSV(filename, entriesToProcess, noOfFeatures, normalize_flag = False):
 				if (key not in ['url', ' timedelta']) :
 #					print "array[%d][%d] = %f", i, j,value
 					try:
-						if (key != ' shares') : 
+						if (key not in [' shares', 'score']) : 
 							x[i,j] = float(value)
 							j += 1
 						else : 
