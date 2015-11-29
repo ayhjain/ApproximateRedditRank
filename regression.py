@@ -135,7 +135,7 @@ def learningGradientDescent(X, Y, noOfIterations) :
 			
 			cost = 0.0
 			for j in range(iter):
-				alfa = 0.000000000001#/((j+1)**2)
+				alfa = 0.01/((j+1)**2)
 				hypothesis = np.dot(x_training, wGD)
 				loss = hypothesis - y_training
 				cost = np.sum(loss ** 2) / (2*n)
